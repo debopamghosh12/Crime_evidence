@@ -113,10 +113,10 @@ export default function EvidenceDetailPage() {
 
                         <div className="space-y-4">
                             <div>
-                                <label className="text-sm font-medium">Recipient User ID</label>
+                                <label className="text-sm font-medium">Recipient User ID or Username</label>
                                 <input
                                     className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:ring-2 focus-visible:ring-ring"
-                                    placeholder="Enter User ID (e.g. uuid)"
+                                    placeholder="Enter Username or ID"
                                     value={targetUserId}
                                     onChange={e => setTargetUserId(e.target.value)}
                                 />

@@ -53,11 +53,20 @@ router.post(
             }
 
             // Verify recipient exists and is active
-            const recipient = await prisma.user.findUnique({ where: { id: toUserId } });
+            let recipient = await prisma.user.findUnique({ where: { id: toUserId } });
+
+            // If not found by ID, try finding by username
+            if (!recipient) {
+                recipient = await prisma.user.findUnique({ where: { username: toUserId } });
+            }
+
             if (!recipient || !recipient.isActive) {
                 res.status(404).json({ error: "Recipient user not found or inactive." });
                 return;
             }
+
+            // Use the actual ID for the event
+            const finalToUserId = recipient.id;
 
             // Lock evidence and create pending transfer event
             const [updatedEvidence, custodyEvent] = await prisma.$transaction([
@@ -69,7 +78,7 @@ router.post(
                     data: {
                         evidenceId: evidence.id,
                         fromUserId: req.user!.id,
-                        toUserId,
+                        toUserId: finalToUserId,
                         eventType: "transfer",
                         reason,
                         status: "pending",
@@ -96,7 +105,7 @@ router.post(
                     id: custodyEvent.id,
                     evidenceId: evidence.id,
                     fromUserId: req.user!.id,
-                    toUserId,
+                    toUserId: finalToUserId,
                     status: "pending",
                     locked: true,
                 },
