@@ -1,0 +1,1 @@
+{"error":"Failed to seed","details":"\nInvalid `prisma.user.count()` invocation:\n\n\nThe table `main.User` does not exist in the current database."}

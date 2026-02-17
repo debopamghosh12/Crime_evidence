@@ -1,0 +1,48 @@
+{
+  "name": "crime-evidence-mcp-server",
+  "version": "1.0.0",
+  "description": "MCP Server for Crime Evidence Management System — exposes demo configuration as a resource with mutation tools",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "start:mcp": "node dist/index.js --mode mcp",
+    "start:api": "node dist/index.js --mode api",
+    "dev": "npx tsx src/index.ts",
+    "dev:mcp": "npx tsx src/index.ts --mode mcp",
+    "dev:api": "npx tsx src/index.ts --mode api"
+  },
+  "keywords": [
+    "mcp",
+    "crime-evidence",
+    "blockchain",
+    "hyperledger"
+  ],
+  "license": "UNLICENSED",
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "@prisma/adapter-better-sqlite3": "^7.4.0",
+    "@prisma/client": "^7.4.0",
+    "@types/better-sqlite3": "^7.6.13",
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.6.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.3.1",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.3",
+    "prisma": "^7.4.0",
+    "uuid": "^11.1.0",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^22.13.4",
+    "@types/uuid": "^10.0.0",
+    "tsx": "^4.19.3",
+    "typescript": "^5.7.3"
+  }
+}

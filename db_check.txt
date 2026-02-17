@@ -1,0 +1,4 @@
+{
+  "cwd": "E:\\PROJECTS FOR DEBOPAM\\Crime Evidence Systems 2",
+  "resolved": "E:\\PROJECTS FOR DEBOPAM\\Crime Evidence Systems 2\\dev.db"
+}

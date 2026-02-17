@@ -1,0 +1,212 @@
+{
+  "system": {
+    "name": "Crime Evidence Management System",
+    "version": "1.0.0",
+    "environment": "development",
+    "description": "Blockchain-based platform for tamper-proof, transparent, and legally defensible criminal evidence management"
+  },
+  "blockchain": {
+    "platform": "Hyperledger Fabric",
+    "fabric_version": "2.5+",
+    "consensus": "Raft",
+    "organizations": [
+      {
+        "name": "Police Department",
+        "peers": 2,
+        "orderers": 1
+      },
+      {
+        "name": "Forensic Lab",
+        "peers": 2,
+        "orderers": 1
+      },
+      {
+        "name": "Prosecutors Office",
+        "peers": 2,
+        "orderers": 1
+      }
+    ],
+    "total_peers": 6,
+    "total_orderers": 3,
+    "channels": [
+      {
+        "name": "general-evidence",
+        "description": "General evidence channel accessible to all organizations",
+        "private": false
+      },
+      {
+        "name": "sensitive-evidence",
+        "description": "Private channel for sensitive evidence with restricted access",
+        "private": true
+      }
+    ],
+    "chaincode_language": "Go",
+    "identity": "X.509 certificates via Fabric CA"
+  },
+  "storage": {
+    "type": "IPFS",
+    "implementation": "Kubo",
+    "ipfs_nodes": 5,
+    "replication_factor": 3,
+    "max_file_size_mb": 500,
+    "batch_upload_limit": 50,
+    "encryption": "AES-256",
+    "supported_formats": [
+      "JPG",
+      "PNG",
+      "MP4",
+      "PDF",
+      "DOC",
+      "DOCX",
+      "TIFF"
+    ],
+    "pinning_enabled": true,
+    "cdn_integration": true
+  },
+  "database": {
+    "primary": {
+      "type": "PostgreSQL",
+      "version": "15+",
+      "host": "localhost",
+      "port": 5432,
+      "name": "crime_evidence_db"
+    },
+    "cache": {
+      "type": "Redis",
+      "version": "7+",
+      "host": "localhost",
+      "port": 6379
+    },
+    "object_storage": {
+      "type": "MinIO",
+      "s3_compatible": true
+    }
+  },
+  "security": {
+    "mfa_enabled": true,
+    "mfa_methods": [
+      "TOTP",
+      "SMS",
+      "email_backup_codes",
+      "biometric_mobile",
+      "hardware_token"
+    ],
+    "session_timeout_min": 60,
+    "max_concurrent_sessions": 1,
+    "encryption_algorithm": "AES-256",
+    "tls_version": "1.3",
+    "hashing_algorithm": "SHA-256",
+    "authentication": {
+      "blockchain_identity": "X.509 certificates",
+      "web_access": "OAuth 2.0 / OpenID Connect",
+      "token_type": "JWT"
+    },
+    "compliance": [
+      "GDPR",
+      "HIPAA",
+      "CJIS"
+    ],
+    "key_management": "HashiCorp Vault",
+    "waf_enabled": true,
+    "ddos_protection": true,
+    "penetration_testing_frequency": "quarterly",
+    "security_audit_frequency": "annual (SOC 2 Type II)"
+  },
+  "roles": [
+    {
+      "name": "officer",
+      "display_name": "Field Officer",
+      "permissions": [
+        "register_evidence",
+        "request_access",
+        "view_assigned_cases"
+      ]
+    },
+    {
+      "name": "custodian",
+      "display_name": "Evidence Custodian",
+      "permissions": [
+        "accept_transfers",
+        "manage_storage",
+        "approve_access"
+      ]
+    },
+    {
+      "name": "analyst",
+      "display_name": "Forensic Analyst",
+      "permissions": [
+        "access_evidence_files",
+        "create_analysis_reports",
+        "version_evidence"
+      ]
+    },
+    {
+      "name": "prosecutor",
+      "display_name": "Prosecutor / Legal Counsel",
+      "permissions": [
+        "read_only_access",
+        "generate_reports",
+        "export_data"
+      ]
+    },
+    {
+      "name": "admin",
+      "display_name": "System Administrator",
+      "permissions": [
+        "user_management",
+        "system_configuration",
+        "network_administration"
+      ]
+    },
+    {
+      "name": "auditor",
+      "display_name": "Auditor",
+      "permissions": [
+        "read_only_all_records",
+        "generate_compliance_reports"
+      ]
+    }
+  ],
+  "evidence_lifecycle": {
+    "statuses": [
+      "Collected",
+      "Analyzed",
+      "Presented",
+      "Archived",
+      "Destroyed"
+    ],
+    "retention_days": 3650,
+    "auto_archive": false,
+    "destruction_requires_approval": true,
+    "certificate_of_destruction": true
+  },
+  "performance": {
+    "evidence_registration_max_seconds": 3,
+    "search_results_max_seconds": 2,
+    "file_upload_10mb_max_seconds": 10,
+    "report_generation_max_seconds": 5,
+    "dashboard_load_max_seconds": 2,
+    "concurrent_users": 1000,
+    "daily_evidence_registrations": 10000,
+    "daily_blockchain_transactions": 50000
+  },
+  "notifications": {
+    "in_app": true,
+    "email": true,
+    "sms_high_priority": true,
+    "types": [
+      "transfer_request",
+      "access_approval",
+      "integrity_failure",
+      "custody_gap",
+      "retention_expiry"
+    ]
+  },
+  "dynamic_sections": {
+    "audit_settings": {
+      "log_retention_days": 365,
+      "real_time_feed": true,
+      "anomaly_detection": true
+    }
+  }
+}

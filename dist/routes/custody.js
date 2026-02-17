@@ -1,0 +1,258 @@
+/**
+ * Custody transfer routes with evidence locking.
+ *
+ * Flow:
+ * 1. Initiate → evidence.locked = true, event.status = 'pending'
+ * 2. Approve  → evidence.locked = false, custody transferred, signature required
+ * 3. Reject   → evidence.locked = false, no custody change
+ *
+ * Attempting a second transfer while locked → 409 Conflict
+ */
+import { Router } from "express";
+import { authenticate, requirePermission, prisma } from "../middleware/auth.js";
+import { generateCustodySignature } from "../utils/hash.js";
+const router = Router();
+// ---------------------------------------------------------------------------
+// POST /api/v1/evidence/:id/transfer — initiate custody transfer
+// ---------------------------------------------------------------------------
+router.post("/evidence/:id/transfer", authenticate, requirePermission("accept_transfers"), async (req, res) => {
+    try {
+        const { toUserId, reason } = req.body;
+        if (!toUserId || !reason) {
+            res.status(400).json({
+                error: "Missing required fields",
+                required: ["toUserId", "reason"],
+            });
+            return;
+        }
+        const evidence = await prisma.evidence.findUnique({
+            where: { id: req.params.id },
+        });
+        if (!evidence) {
+            res.status(404).json({ error: "Evidence not found." });
+            return;
+        }
+        // LOCKING CHECK: prevent double-transfers
+        if (evidence.locked) {
+            res.status(409).json({
+                error: "Evidence is locked due to a pending custody transfer.",
+                hint: "The current pending transfer must be approved or rejected first.",
+            });
+            return;
+        }
+        // Verify recipient exists and is active
+        const recipient = await prisma.user.findUnique({ where: { id: toUserId } });
+        if (!recipient || !recipient.isActive) {
+            res.status(404).json({ error: "Recipient user not found or inactive." });
+            return;
+        }
+        // Lock evidence and create pending transfer event
+        const [updatedEvidence, custodyEvent] = await prisma.$transaction([
+            prisma.evidence.update({
+                where: { id: evidence.id },
+                data: { locked: true },
+            }),
+            prisma.custodyEvent.create({
+                data: {
+                    evidenceId: evidence.id,
+                    fromUserId: req.user.id,
+                    toUserId,
+                    eventType: "transfer",
+                    reason,
+                    status: "pending",
+                },
+            }),
+        ]);
+        // Log the transfer initiation
+        await prisma.accessLog.create({
+            data: {
+                evidenceId: evidence.id,
+                userId: req.user.id,
+                action: "transfer",
+                result: "success",
+                ipAddress: req.ip ?? null,
+                userAgent: req.headers["user-agent"] ?? null,
+            },
+        });
+        res.status(201).json({
+            success: true,
+            message: "Custody transfer initiated. Evidence is now locked.",
+            transfer: {
+                id: custodyEvent.id,
+                evidenceId: evidence.id,
+                fromUserId: req.user.id,
+                toUserId,
+                status: "pending",
+                locked: true,
+            },
+        });
+    }
+    catch (err) {
+        res.status(500).json({ error: "Failed to initiate transfer", details: err.message });
+    }
+});
+// ---------------------------------------------------------------------------
+// POST /api/v1/custody/transfer/:id/approve — approve pending transfer
+// Requires mandatory signature
+// ---------------------------------------------------------------------------
+router.post("/transfer/:id/approve", authenticate, requirePermission("accept_transfers"), async (req, res) => {
+    try {
+        const { signature } = req.body;
+        // Signature is MANDATORY for approval
+        if (!signature) {
+            res.status(400).json({
+                error: "Signature is required to approve a custody transfer.",
+                hint: "Provide a digital signature or verification hash in the 'signature' field.",
+            });
+            return;
+        }
+        const event = await prisma.custodyEvent.findUnique({
+            where: { id: req.params.id },
+            include: { evidence: true },
+        });
+        if (!event) {
+            res.status(404).json({ error: "Transfer event not found." });
+            return;
+        }
+        if (event.status !== "pending") {
+            res.status(400).json({
+                error: `Transfer has already been ${event.status}.`,
+            });
+            return;
+        }
+        // Only the recipient can approve
+        if (event.toUserId !== req.user.id) {
+            res.status(403).json({
+                error: "Only the designated recipient can approve this transfer.",
+            });
+            return;
+        }
+        // Generate chain signature (links to previous state)
+        const chainSignature = generateCustodySignature({
+            evidenceId: event.evidenceId,
+            fromUserId: event.fromUserId,
+            toUserId: event.toUserId,
+            timestamp: new Date().toISOString(),
+            previousSignature: signature,
+        });
+        // Approve: update event, transfer custody, unlock evidence
+        const [updatedEvent, updatedEvidence] = await prisma.$transaction([
+            prisma.custodyEvent.update({
+                where: { id: event.id },
+                data: {
+                    status: "approved",
+                    signature: chainSignature,
+                },
+            }),
+            prisma.evidence.update({
+                where: { id: event.evidenceId },
+                data: {
+                    locked: false,
+                    currentCustodianId: event.toUserId,
+                },
+            }),
+        ]);
+        res.json({
+            success: true,
+            message: "Custody transfer approved. Evidence unlocked.",
+            transfer: {
+                id: updatedEvent.id,
+                status: "approved",
+                signature: chainSignature,
+                newCustodianId: event.toUserId,
+                locked: false,
+            },
+        });
+    }
+    catch (err) {
+        res.status(500).json({ error: "Failed to approve transfer", details: err.message });
+    }
+});
+// ---------------------------------------------------------------------------
+// POST /api/v1/custody/transfer/:id/reject — reject pending transfer
+// ---------------------------------------------------------------------------
+router.post("/transfer/:id/reject", authenticate, requirePermission("accept_transfers"), async (req, res) => {
+    try {
+        const { reason } = req.body;
+        if (!reason) {
+            res.status(400).json({ error: "Reason is required to reject a transfer." });
+            return;
+        }
+        const event = await prisma.custodyEvent.findUnique({
+            where: { id: req.params.id },
+        });
+        if (!event) {
+            res.status(404).json({ error: "Transfer event not found." });
+            return;
+        }
+        if (event.status !== "pending") {
+            res.status(400).json({
+                error: `Transfer has already been ${event.status}.`,
+            });
+            return;
+        }
+        // Only the recipient can reject
+        if (event.toUserId !== req.user.id) {
+            res.status(403).json({
+                error: "Only the designated recipient can reject this transfer.",
+            });
+            return;
+        }
+        // Reject: update event and unlock evidence
+        const [updatedEvent, updatedEvidence] = await prisma.$transaction([
+            prisma.custodyEvent.update({
+                where: { id: event.id },
+                data: { status: "rejected", reason: `${event.reason} | Rejected: ${reason}` },
+            }),
+            prisma.evidence.update({
+                where: { id: event.evidenceId },
+                data: { locked: false },
+            }),
+        ]);
+        res.json({
+            success: true,
+            message: "Custody transfer rejected. Evidence unlocked.",
+            transfer: {
+                id: updatedEvent.id,
+                status: "rejected",
+                locked: false,
+            },
+        });
+    }
+    catch (err) {
+        res.status(500).json({ error: "Failed to reject transfer", details: err.message });
+    }
+});
+// ---------------------------------------------------------------------------
+// GET /api/v1/custody/:evidenceId/history — full chain of custody timeline
+// ---------------------------------------------------------------------------
+router.get("/:evidenceId/history", authenticate, async (req, res) => {
+    try {
+        const evidence = await prisma.evidence.findUnique({
+            where: { id: req.params.evidenceId },
+            select: { id: true, caseId: true, status: true, locked: true },
+        });
+        if (!evidence) {
+            res.status(404).json({ error: "Evidence not found." });
+            return;
+        }
+        const events = await prisma.custodyEvent.findMany({
+            where: { evidenceId: req.params.evidenceId },
+            orderBy: { timestamp: "asc" },
+            include: {
+                fromUser: { select: { id: true, username: true, fullName: true, role: true } },
+                toUser: { select: { id: true, username: true, fullName: true, role: true } },
+            },
+        });
+        res.json({
+            evidence,
+            chain_of_custody: events,
+            total_events: events.length,
+        });
+    }
+    catch (err) {
+        res.status(500).json({ error: "Failed to fetch custody history", details: err.message });
+    }
+});
+export default router;
+//# sourceMappingURL=custody.js.map
