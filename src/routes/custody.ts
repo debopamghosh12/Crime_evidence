@@ -21,7 +21,7 @@ const router = Router();
 router.post(
     "/evidence/:id/transfer",
     authenticate,
-    requirePermission("accept_transfers"),
+    requirePermission("transfer_evidence"),
     async (req: Request, res: Response) => {
         try {
             const { toUserId, reason } = req.body;

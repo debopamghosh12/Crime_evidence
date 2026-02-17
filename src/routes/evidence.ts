@@ -211,6 +211,36 @@ router.get("/", authenticate, async (req: Request, res: Response) => {
             ];
         }
 
+        // -----------------------------------------------------------------------
+        // RBAC: Data Isolation
+        // -----------------------------------------------------------------------
+        const user = req.user!;
+        const canViewAll = ["admin", "auditor"].includes(user.role);
+
+        if (!canViewAll) {
+            // Users can only see evidence they collected OR currently hold
+            // We combine this with existing filters using AND logic if needed,
+            // but since 'where' is an object, we need to be careful not to overwrite OR from search.
+
+            const accessFilter = {
+                OR: [
+                    { collectedById: user.id },
+                    { currentCustodianId: user.id }
+                ]
+            };
+
+            if (where.OR) {
+                // If we already have an OR for search, we need to wrap everything in an AND
+                where.AND = [
+                    accessFilter,
+                    { OR: where.OR }
+                ];
+                delete where.OR; // Move search OR inside AND
+            } else {
+                where.OR = accessFilter.OR;
+            }
+        }
+
         const pageNum = Math.max(1, parseInt(page as string, 10));
         const pageSize = Math.min(100, Math.max(1, parseInt(limit as string, 10)));
         const skip = (pageNum - 1) * pageSize;

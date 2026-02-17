@@ -119,7 +119,8 @@
       "permissions": [
         "register_evidence",
         "request_access",
-        "view_assigned_cases"
+        "view_assigned_cases",
+        "transfer_evidence"
       ]
     },
     {
@@ -128,7 +129,8 @@
       "permissions": [
         "accept_transfers",
         "manage_storage",
-        "approve_access"
+        "approve_access",
+        "transfer_evidence"
       ]
     },
     {
@@ -137,7 +139,8 @@
       "permissions": [
         "access_evidence_files",
         "create_analysis_reports",
-        "version_evidence"
+        "version_evidence",
+        "transfer_evidence"
       ]
     },
     {

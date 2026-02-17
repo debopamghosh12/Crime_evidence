@@ -1,0 +1,15 @@
+Setting up test users...
+Test users setup complete.
+
+
+Testing Role: officer (Should succeed: true)
+✅ Success: officer was able to register evidence.
+
+Testing Role: analyst (Should succeed: false)
+✅ Success: analyst was blocked (403 Forbidden).
+
+Testing Role: custodian (Should succeed: false)
+✅ Success: custodian was blocked (403 Forbidden).
+
+Testing Transfer for Evidence ID: adceca8e-a687-48ab-a8c6-3ee89230fb65
+✅ Transfer initiated (or verified permission).

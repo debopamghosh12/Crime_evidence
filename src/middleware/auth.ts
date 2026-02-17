@@ -91,20 +91,29 @@ export function requirePermission(...requiredPermissions: string[]) {
 
         // Check if the role has ALL required permissions
         const rolePermissions = roleConfig.permissions;
-        const missingPermissions = requiredPermissions.filter((p) => !rolePermissions.includes(p));
-
-        if (missingPermissions.length > 0) {
-            res.status(403).json({
-                error: "Insufficient permissions.",
-                required: requiredPermissions,
-                missing: missingPermissions,
-                your_role: roleConfig.display_name,
-                your_permissions: rolePermissions,
+        error: `Role "${userRole}" is not defined in the current system configuration.`,
+            hint: "The role may have been renamed or removed. Contact an administrator.",
             });
-            return;
-        }
+    return;
+}
 
-        next();
+// Check if the role has ALL required permissions
+const rolePermissions = roleConfig.permissions;
+console.log(`[RBAC] Required: ${requiredPermissions}, Has: ${rolePermissions}`);
+const missingPermissions = requiredPermissions.filter((p) => !rolePermissions.includes(p));
+
+if (missingPermissions.length > 0) {
+    res.status(403).json({
+        error: "Insufficient permissions.",
+        required: requiredPermissions,
+        missing: missingPermissions,
+        your_role: roleConfig.display_name,
+        your_permissions: rolePermissions,
+    });
+    return;
+}
+
+next();
     };
 }
 
