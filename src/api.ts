@@ -12,6 +12,7 @@ import { readConfig, writeConfig } from "./server.js";
 import authRoutes from "./routes/auth.js";
 import evidenceRoutes from "./routes/evidence.js";
 import custodyRoutes from "./routes/custody.js";
+import boxRoutes from "./routes/boxes.js";
 import statRoutes from "./routes/stats.js";
 import { prisma } from "./lib/prisma.js";
 
@@ -177,6 +178,7 @@ export function createApp(): express.Express {
     app.use("/api/v1/auth", authRoutes);
     app.use("/api/v1/evidence", evidenceRoutes);
     app.use("/api/v1/custody", custodyRoutes);
+    app.use("/api/v1/boxes", boxRoutes);
     app.use("/api/v1/stats", statRoutes);
 
     // -------------------------------------------------------------------------

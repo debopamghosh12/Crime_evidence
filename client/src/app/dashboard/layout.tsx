@@ -61,23 +61,24 @@ export default function DashboardLayout({
             {/* Sidebar */}
             <aside
                 className={cn(
-                    "fixed inset-y-0 left-0 z-50 w-64 transform border-r border-border bg-card transition-transform duration-300 lg:static lg:translate-x-0",
+                    "fixed inset-y-0 left-0 z-50 w-64 transform border-r border-white/10 bg-black transition-transform duration-300 lg:static lg:translate-x-0",
                     sidebarOpen ? "translate-x-0" : "-translate-x-full"
                 )}
             >
-                <div className="flex h-16 items-center justify-between px-6 border-b border-border">
-                    <span className="text-xl font-bold tracking-tight text-primary">
-                        CrimeEv<span className="text-foreground">Sys</span>
-                    </span>
+                <div className="flex h-16 items-center justify-between px-6 border-b border-white/10">
+                    <Link href="/dashboard" className="flex items-center gap-2">
+                        <span className="text-xl font-bold tracking-widest text-primary">DFX</span>
+                        <span className="text-xs text-muted-foreground uppercase tracking-wider">Secure</span>
+                    </Link>
                     <button
-                        className="lg:hidden"
+                        className="lg:hidden text-muted-foreground hover:text-primary"
                         onClick={() => setSidebarOpen(false)}
                     >
                         <X className="h-6 w-6" />
                     </button>
                 </div>
 
-                <nav className="flex-1 space-y-1 px-3 py-4">
+                <nav className="flex-1 space-y-1 px-4 py-6">
                     {navigation.map((item) => {
                         const isActive = pathname === item.href;
                         return (
@@ -85,16 +86,16 @@ export default function DashboardLayout({
                                 key={item.name}
                                 href={item.href}
                                 className={cn(
-                                    "flex items-center rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                                    "group flex items-center gap-3 px-4 py-3 text-sm font-medium transition-all duration-200 border-l-2",
                                     isActive
-                                        ? "bg-primary/10 text-primary"
-                                        : "text-muted-foreground hover:bg-muted hover:text-foreground"
+                                        ? "border-primary bg-primary/10 text-primary"
+                                        : "border-transparent text-muted-foreground hover:bg-white/5 hover:text-white"
                                 )}
                             >
                                 <item.icon
                                     className={cn(
-                                        "mr-3 h-5 w-5 flex-shrink-0",
-                                        isActive ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                                        "h-5 w-5 transition-colors",
+                                        isActive ? "text-primary" : "text-muted-foreground group-hover:text-white"
                                     )}
                                 />
                                 {item.name}
@@ -103,27 +104,34 @@ export default function DashboardLayout({
                     })}
                 </nav>
 
-                <div className="border-t border-border p-4">
-                    <div className="flex items-center gap-3 px-3 py-3">
-                        <div className="h-10 w-10 rounded-full bg-secondary/20 flex items-center justify-center text-secondary">
-                            <User className="h-5 w-5" />
+                {/* User Profile Snippet */}
+                <div className="px-6 py-6 border-b border-white/5 order-first lg:order-none">
+                    {/* I'm placing this here to match DFX structure if needed, or keeping it at bottom. 
+                      Actually, let's keep the user profile simpler or move it. 
+                      The previous footer had user profile. DFX usually has it top or bottom. 
+                      Let's stick to the previous structure but styled.
+                  */}
+                </div>
+
+                <div className="p-4 border-t border-white/10 mt-auto">
+                    <div className="mb-4">
+                        <div className="flex items-center gap-3 px-2 py-2">
+                            <div className="h-8 w-8 bg-white/10 flex items-center justify-center text-primary font-bold border border-white/10">
+                                {user?.fullName?.charAt(0) || "U"}
+                            </div>
+                            <div className="overflow-hidden">
+                                <p className="truncate text-sm font-medium text-white">{user?.fullName}</p>
+                                <p className="truncate text-xs text-muted-foreground capitalize">{user?.role}</p>
+                            </div>
                         </div>
-                        <div className="flex-1 overflow-hidden">
-                            <p className="truncate text-sm font-medium text-foreground">
-                                {user?.fullName}
-                            </p>
-                            <p className="truncate text-xs text-muted-foreground capitalize">
-                                {user?.role}
-                            </p>
-                        </div>
-                        <button
-                            onClick={logout}
-                            className="rounded-full p-2 text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
-                            title="Logout"
-                        >
-                            <LogOut className="h-5 w-5" />
-                        </button>
                     </div>
+                    <button
+                        onClick={logout}
+                        className="flex w-full items-center gap-3 px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10 transition-colors uppercase tracking-wider"
+                    >
+                        <LogOut className="h-4 w-4" />
+                        Sign Out
+                    </button>
                 </div>
             </aside>
 

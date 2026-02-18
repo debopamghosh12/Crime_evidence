@@ -50,49 +50,63 @@
   Using Zinc/Slate bases with Violet/Indigo accents.
 */
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.967 0.001 286.375);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.967 0.001 286.375);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.967 0.001 286.375);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.208 0.042 265.755);
-  --radius: 0.5rem;
+  /* DFX Theme - Pure Black Background */
+  --background: oklch(0 0 0); /* Pure Black */
+  --foreground: oklch(1 0 0); /* White */
+
+  /* Card - Very Dark Grey */
+  --card: oklch(0.05 0 0);
+  --card-foreground: oklch(1 0 0);
+
+  --popover: oklch(0.05 0 0);
+  --popover-foreground: oklch(1 0 0);
+
+  /* Neon Green Accent */
+  --primary: oklch(0.7 0.2 145); /* Neon Green */
+  --primary-foreground: oklch(0 0 0); /* Black text on green */
+
+  /* Secondary - Dark Grey/Green tint */
+  --secondary: oklch(0.15 0.05 145);
+  --secondary-foreground: oklch(0.9 0.05 145);
+
+  --muted: oklch(0.15 0 0);
+  --muted-foreground: oklch(0.6 0 0);
+
+  --accent: oklch(0.15 0.05 145);
+  --accent-foreground: oklch(1 0 0);
+
+  /* Destructive - Red */
+  --destructive: oklch(0.5 0.2 25);
+  --destructive-foreground: oklch(1 0 0);
+
+  --border: oklch(0.2 0 0);
+  --input: oklch(0.2 0 0);
+  --ring: oklch(0.7 0.2 145); /* Match Primary */
+
+  --radius: 0px; /* Sharp edges for high-tech feel */
 }
 
 .dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.129 0.042 264.695);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.129 0.042 264.695);
-  --popover-foreground: oklch(0.985 0 0);
-  /* Vibrant Violet Primary */
-  --primary: oklch(0.65 0.25 280); 
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.279 0.041 260.031);
-  --input: oklch(0.279 0.041 260.031);
-  --ring: oklch(0.442 0.17 280);
+  /* Match Root */
+  --background: oklch(0 0 0);
+  --foreground: oklch(1 0 0);
+  --card: oklch(0.05 0 0);
+  --card-foreground: oklch(1 0 0);
+  --popover: oklch(0.05 0 0);
+  --popover-foreground: oklch(1 0 0);
+  --primary: oklch(0.7 0.2 145); 
+  --primary-foreground: oklch(0 0 0);
+  --secondary: oklch(0.15 0.05 145);
+  --secondary-foreground: oklch(0.9 0.05 145);
+  --muted: oklch(0.15 0 0);
+  --muted-foreground: oklch(0.6 0 0);
+  --accent: oklch(0.15 0.05 145);
+  --accent-foreground: oklch(1 0 0);
+  --destructive: oklch(0.5 0.2 25);
+  --destructive-foreground: oklch(1 0 0);
+  --border: oklch(0.2 0 0);
+  --input: oklch(0.2 0 0);
+  --ring: oklch(0.7 0.2 145);
 }
 
 @utility container {

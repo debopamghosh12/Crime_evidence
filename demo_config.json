@@ -162,6 +162,35 @@
       ]
     },
     {
+      "name": "head_officer",
+      "display_name": "Head Officer",
+      "permissions": [
+        "create_crime_box",
+        "generate_keys",
+        "register_evidence",
+        "transfer_evidence",
+        "view_assigned_cases"
+      ]
+    },
+    {
+      "name": "lawyer",
+      "display_name": "Defense/Prosecution Lawyer",
+      "permissions": [
+        "read_only_access",
+        "view_evidence",
+        "request_access"
+      ]
+    },
+    {
+      "name": "judge",
+      "display_name": "Judge",
+      "permissions": [
+        "read_only_access",
+        "view_evidence",
+        "issue_warrants"
+      ]
+    },
+    {
       "name": "auditor",
       "display_name": "Auditor",
       "permissions": [

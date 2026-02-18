@@ -6,16 +6,20 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Save, Loader2, UploadCloud } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
+import { useCrimeBox } from "@/context/CrimeBoxContext";
 
 export default function NewEvidencePage() {
     const router = useRouter();
+    const { permission, activeBox } = useCrimeBox();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+
+    // ... permission check ...
 
     const [files, setFiles] = useState<FileList | null>(null);
 
     const [formData, setFormData] = useState({
-        caseId: "",
+        caseId: activeBox?.caseId || "", // Pre-fill from active box
         type: "Physical",
         description: "",
         collectionDate: new Date().toISOString().split("T")[0],
