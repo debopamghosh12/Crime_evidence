@@ -23,26 +23,26 @@ export default function EvidenceListPage() {
     const [searchTerm, setSearchTerm] = useState("");
     const [pagination, setPagination] = useState({ page: 1, totalPages: 1 });
 
-    const fetchEvidence = async () => {
-        setLoading(true);
-        try {
-            const response = await axios.get("/api/v1/evidence", {
-                params: {
-                    search: searchTerm,
-                    page: pagination.page,
-                    limit: 10,
-                },
-            });
-            setEvidence(response.data.evidence);
-            setPagination(response.data.pagination);
-        } catch (error) {
-            console.error("Failed to fetch evidence:", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
     useEffect(() => {
+        const fetchEvidence = async () => {
+            setLoading(true);
+            try {
+                const response = await axios.get("/api/v1/evidence", {
+                    params: {
+                        search: searchTerm,
+                        page: pagination.page,
+                        limit: 10,
+                    },
+                });
+                setEvidence(response.data.evidence);
+                setPagination(response.data.pagination);
+            } catch (error) {
+                console.error("Failed to fetch evidence:", error);
+            } finally {
+                setLoading(false);
+            }
+        };
+
         const timer = setTimeout(() => {
             fetchEvidence();
         }, 500); // Debounce search

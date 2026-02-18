@@ -27,9 +27,9 @@ interface EvidenceDetail {
     collectedBy: { fullName: string };
     currentCustodian: { fullName: string };
     locked?: boolean;
-    custodyEvents?: any[];
+    custodyEvents?: unknown[];
     files?: { id: string; fileName: string; fileSize: number; mimeType: string }[];
-    accessLogs?: any[]; // Placeholder for now
+    accessLogs?: unknown[]; // Placeholder for now
 }
 
 export default function EvidenceDetailPage() {
@@ -57,7 +57,8 @@ export default function EvidenceDetailPage() {
             const response = await axios.get(`/api/v1/evidence/${params.id}`);
             setEvidence(response.data.evidence);
             alert("Transfer initiated successfully!");
-        } catch (err: any) {
+        } catch (error: unknown) {
+            const err = error as { response?: { data?: { error?: string } } };
             alert(err.response?.data?.error || "Transfer failed");
         } finally {
             setTransferLoading(false);
@@ -69,7 +70,7 @@ export default function EvidenceDetailPage() {
             try {
                 const response = await axios.get(`/api/v1/evidence/${params.id}`);
                 setEvidence(response.data.evidence);
-            } catch (err: any) {
+            } catch {
                 setError("Failed to load evidence details.");
             } finally {
                 setLoading(false);
@@ -257,7 +258,7 @@ export default function EvidenceDetailPage() {
                             </div>
 
                             {/* Custody Events */}
-                            {evidence.custodyEvents?.map((event: any) => (
+                            {evidence.custodyEvents?.map((event: any) => ( // eslint-disable-line @typescript-eslint/no-explicit-any
                                 <div key={event.id} className="relative">
                                     <span className={cn(
                                         "absolute -left-[31px] flex h-4 w-4 items-center justify-center rounded-full ring-4 ring-background",
@@ -267,7 +268,7 @@ export default function EvidenceDetailPage() {
                                     <p className="text-xs text-muted-foreground">
                                         From: {event.fromUser?.fullName} → To: {event.toUser?.fullName}
                                     </p>
-                                    <p className="text-xs text-muted-foreground italic mt-0.5">"{event.reason}"</p>
+                                    <p className="text-xs text-muted-foreground italic mt-0.5">&quot;{event.reason}&quot;</p>
                                     <p className="text-xs text-muted-foreground mt-1">
                                         {new Date(event.timestamp).toLocaleString()}
                                     </p>

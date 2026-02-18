@@ -60,7 +60,7 @@ export default function NewEvidencePage() {
             if (response.data.success) {
                 router.push("/dashboard/evidence");
             }
-        } catch (err: any) {
+        } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
             setError(err.response?.data?.error || "Failed to register evidence.");
         } finally {
             setLoading(false);

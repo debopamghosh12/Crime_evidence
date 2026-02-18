@@ -42,7 +42,7 @@ export default function RegisterPage() {
                 setSuccess(true);
                 setTimeout(() => router.push("/login"), 2000);
             }
-        } catch (err: any) {
+        } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
             setError(
                 err.response?.data?.error || "Registration failed. Please try again."
             );
