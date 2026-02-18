@@ -15,7 +15,7 @@ const router = Router();
 // ---------------------------------------------------------------------------
 // POST /api/v1/evidence/:id/transfer — initiate custody transfer
 // ---------------------------------------------------------------------------
-router.post("/evidence/:id/transfer", authenticate, requirePermission("accept_transfers"), async (req, res) => {
+router.post("/evidence/:id/transfer", authenticate, requirePermission("transfer_evidence"), async (req, res) => {
     try {
         const { toUserId, reason } = req.body;
         if (!toUserId || !reason) {
@@ -41,11 +41,17 @@ router.post("/evidence/:id/transfer", authenticate, requirePermission("accept_tr
             return;
         }
         // Verify recipient exists and is active
-        const recipient = await prisma.user.findUnique({ where: { id: toUserId } });
+        let recipient = await prisma.user.findUnique({ where: { id: toUserId } });
+        // If not found by ID, try finding by username
+        if (!recipient) {
+            recipient = await prisma.user.findUnique({ where: { username: toUserId } });
+        }
         if (!recipient || !recipient.isActive) {
             res.status(404).json({ error: "Recipient user not found or inactive." });
             return;
         }
+        // Use the actual ID for the event
+        const finalToUserId = recipient.id;
         // Lock evidence and create pending transfer event
         const [updatedEvidence, custodyEvent] = await prisma.$transaction([
             prisma.evidence.update({
@@ -56,7 +62,7 @@ router.post("/evidence/:id/transfer", authenticate, requirePermission("accept_tr
                 data: {
                     evidenceId: evidence.id,
                     fromUserId: req.user.id,
-                    toUserId,
+                    toUserId: finalToUserId,
                     eventType: "transfer",
                     reason,
                     status: "pending",
@@ -81,7 +87,7 @@ router.post("/evidence/:id/transfer", authenticate, requirePermission("accept_tr
                 id: custodyEvent.id,
                 evidenceId: evidence.id,
                 fromUserId: req.user.id,
-                toUserId,
+                toUserId: finalToUserId,
                 status: "pending",
                 locked: true,
             },
@@ -252,6 +258,44 @@ router.get("/:evidenceId/history", authenticate, async (req, res) => {
     }
     catch (err) {
         res.status(500).json({ error: "Failed to fetch custody history", details: err.message });
+    }
+});
+// ---------------------------------------------------------------------------
+// GET /api/v1/custody/pending — get pending transfers for current user
+// ---------------------------------------------------------------------------
+router.get("/pending", authenticate, async (req, res) => {
+    try {
+        const userId = req.user.id;
+        const [incoming, outgoing] = await Promise.all([
+            // Incoming: I am the recipient, waiting for ME to approve
+            prisma.custodyEvent.findMany({
+                where: {
+                    toUserId: userId,
+                    status: "pending",
+                },
+                include: {
+                    evidence: { select: { id: true, caseId: true, type: true, description: true } },
+                    fromUser: { select: { id: true, username: true, fullName: true, department: true } },
+                },
+                orderBy: { timestamp: "desc" },
+            }),
+            // Outgoing: I initiated, waiting for THEM to approve
+            prisma.custodyEvent.findMany({
+                where: {
+                    fromUserId: userId,
+                    status: "pending",
+                },
+                include: {
+                    evidence: { select: { id: true, caseId: true, type: true, description: true } },
+                    toUser: { select: { id: true, username: true, fullName: true, department: true } },
+                },
+                orderBy: { timestamp: "desc" },
+            }),
+        ]);
+        res.json({ incoming, outgoing });
+    }
+    catch (err) {
+        res.status(500).json({ error: "Failed to fetch pending transfers", details: err.message });
     }
 });
 export default router;

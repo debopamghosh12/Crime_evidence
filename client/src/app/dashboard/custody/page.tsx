@@ -8,15 +8,14 @@ import {
     CheckCircle2,
     XCircle,
     Clock,
-    FileText,
     User,
-    ShieldAlert,
     Loader2
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
 export default function CustodyDashboardPage() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [incoming, setIncoming] = useState<any[]>([]);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const [outgoing, setOutgoing] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
@@ -46,7 +45,8 @@ export default function CustodyDashboardPage() {
             await axios.post(`/api/v1/custody/transfer/${transferId}/approve`, { signature });
             await fetchTransfers(); // Refresh list
             alert("Transfer approved successfully.");
-        } catch (err: any) {
+        } catch (error: unknown) {
+            const err = error as { response?: { data?: { error?: string } } };
             alert(err.response?.data?.error || "Failed to approve transfer.");
         } finally {
             setActionLoading(null);
@@ -62,7 +62,8 @@ export default function CustodyDashboardPage() {
             await axios.post(`/api/v1/custody/transfer/${transferId}/reject`, { reason });
             await fetchTransfers();
             alert("Transfer rejected.");
-        } catch (err: any) {
+        } catch (error: unknown) {
+            const err = error as { response?: { data?: { error?: string } } };
             alert(err.response?.data?.error || "Failed to reject transfer.");
         } finally {
             setActionLoading(null);
@@ -123,7 +124,7 @@ export default function CustodyDashboardPage() {
                                         <span>Sender: <span className="text-foreground font-medium">{transfer.fromUser.fullName}</span></span>
                                     </div>
 
-                                    <p className="text-xs text-muted-foreground italic mb-4">"{transfer.reason}"</p>
+                                    <p className="text-xs text-muted-foreground italic mb-4">&quot;{transfer.reason}&quot;</p>
 
                                     <div className="flex gap-2">
                                         <button

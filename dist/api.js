@@ -11,6 +11,7 @@ import { readConfig, writeConfig } from "./server.js";
 import authRoutes from "./routes/auth.js";
 import evidenceRoutes from "./routes/evidence.js";
 import custodyRoutes from "./routes/custody.js";
+import statRoutes from "./routes/stats.js";
 // ---------------------------------------------------------------------------
 // Create Express app
 // ---------------------------------------------------------------------------
@@ -154,6 +155,7 @@ export function createApp() {
     app.use("/api/v1/auth", authRoutes);
     app.use("/api/v1/evidence", evidenceRoutes);
     app.use("/api/v1/custody", custodyRoutes);
+    app.use("/api/v1/stats", statRoutes);
     // -------------------------------------------------------------------------
     // Global error handler
     // -------------------------------------------------------------------------

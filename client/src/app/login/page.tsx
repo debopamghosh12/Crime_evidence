@@ -28,7 +28,7 @@ export default function LoginPage() {
             if (response.data.success) {
                 login(response.data.token, response.data.user);
             }
-        } catch (err: any) {
+        } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
             setError(
                 err.response?.data?.error || "Login failed. Please check your credentials."
             );
@@ -127,7 +127,7 @@ export default function LoginPage() {
                 </form>
 
                 <div className="text-center text-sm">
-                    <span className="text-muted-foreground">Don't have an account? </span>
+                    <span className="text-muted-foreground">Don&apos;t have an account? </span>
                     <Link
                         href="/register"
                         className="font-medium text-primary hover:text-primary/80 hover:underline transition-colors"

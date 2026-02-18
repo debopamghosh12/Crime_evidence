@@ -1,0 +1,2 @@
+src/lib/prisma.ts(1,10): error TS2305: Module '"@prisma/client"' has no exported member 'PrismaClient'.
+src/routes/evidence.ts(118,61): error TS7006: Parameter 'tx' implicitly has an 'any' type.

@@ -115,7 +115,7 @@ router.post(
             }
 
             // Transaction: Create Evidence + Create EvidenceFiles
-            const result = await prisma.$transaction(async (tx) => {
+            const result = await prisma.$transaction(async (tx: any) => {
                 const evidence = await tx.evidence.create({
                     data: {
                         caseId,

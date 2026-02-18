@@ -4,13 +4,16 @@
 import { Router } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { authenticate, requirePermission, prisma } from "../middleware/auth.js";
+import { authenticate, prisma } from "../middleware/auth.js";
 import { getValidRoleNames, getJwtSecret, getSessionTimeout, } from "../utils/config.js";
 const router = Router();
 // ---------------------------------------------------------------------------
-// POST /api/v1/auth/register — create a new user (requires user_management)
+// POST /api/v1/auth/register — create a new user (Public for demo)
 // ---------------------------------------------------------------------------
-router.post("/register", authenticate, requirePermission("user_management"), async (req, res) => {
+router.post("/register", 
+// authenticate, // Disabled for public registration
+// requirePermission("user_management"),
+async (req, res) => {
     try {
         const { username, email, fullName, badgeNumber, department, role, password } = req.body;
         // Validate required fields

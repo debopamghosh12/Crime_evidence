@@ -43,7 +43,7 @@ async function main(): Promise<void> {
 
         case "api":
             console.log("Starting in API mode (Express REST server)...");
-            startApiServer(3000);
+            startApiServer(3001);
             break;
 
         default:
