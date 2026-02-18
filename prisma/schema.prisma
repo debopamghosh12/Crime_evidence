@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -9,101 +6,78 @@ datasource db {
   provider = "sqlite"
 }
 
-// ---------------------------------------------------------------------------
-// User — system users with role-based access
-// ---------------------------------------------------------------------------
 model User {
-  id           String   @id @default(uuid())
-  username     String   @unique
-  email        String   @unique
-  fullName     String
-  badgeNumber  String?
-  department   String?
-  role         String   // e.g. "officer", "custodian", "analyst" — validated against config
-  passwordHash String
-  mfaEnabled   Boolean  @default(false)
-  isActive     Boolean  @default(true)
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-
-  // Relations
-  collectedEvidence  Evidence[]     @relation("CollectedBy")
-  custodiedEvidence  Evidence[]     @relation("CurrentCustodian")
-  custodyEventsFrom  CustodyEvent[] @relation("FromUser")
-  custodyEventsTo    CustodyEvent[] @relation("ToUser")
-  accessLogs         AccessLog[]
+  id                String         @id @default(uuid())
+  username          String         @unique
+  email             String         @unique
+  fullName          String
+  badgeNumber       String?
+  department        String?
+  role              String
+  passwordHash      String
+  mfaEnabled        Boolean        @default(false)
+  isActive          Boolean        @default(true)
+  createdAt         DateTime       @default(now())
+  updatedAt         DateTime       @updatedAt
+  accessLogs        AccessLog[]
+  custodyEventsTo   CustodyEvent[] @relation("ToUser")
+  custodyEventsFrom CustodyEvent[] @relation("FromUser")
+  custodiedEvidence Evidence[]     @relation("CurrentCustodian")
+  collectedEvidence Evidence[]     @relation("CollectedBy")
 }
 
-// ---------------------------------------------------------------------------
-// Evidence — registered evidence items
-// ---------------------------------------------------------------------------
 model Evidence {
-  id                 String   @id @default(uuid())
+  id                 String         @id @default(uuid())
   caseId             String
-  type               String   // "Physical", "Digital", "Testimonial"
+  type               String
   description        String
   collectionDate     DateTime
   location           String
-  tags               String?  // JSON array stored as string
-  fileHash           String?  // SHA-256 of primary file
-  ipfsCid            String?  // IPFS content identifier
-  status             String   // validated against config.evidence_lifecycle.statuses
-  locked             Boolean  @default(false) // prevents double-transfers
+  tags               String?
+  fileHash           String?
+  ipfsCid            String?
+  status             String
+  locked             Boolean        @default(false)
   officerNotes       String?
-  createdAt          DateTime @default(now())
-  updatedAt          DateTime @updatedAt
-
-  // Relations
+  createdAt          DateTime       @default(now())
+  updatedAt          DateTime       @updatedAt
   collectedById      String
-  collectedBy        User     @relation("CollectedBy", fields: [collectedById], references: [id])
   currentCustodianId String
-  currentCustodian   User     @relation("CurrentCustodian", fields: [currentCustodianId], references: [id])
-  custodyEvents      CustodyEvent[]
   accessLogs         AccessLog[]
+  custodyEvents      CustodyEvent[]
+  currentCustodian   User           @relation("CurrentCustodian", fields: [currentCustodianId], references: [id])
+  collectedBy        User           @relation("CollectedBy", fields: [collectedById], references: [id])
   files              EvidenceFile[]
 }
 
-// ---------------------------------------------------------------------------
-// CustodyEvent — chain of custody transfer events
-// ---------------------------------------------------------------------------
 model CustodyEvent {
   id         String   @id @default(uuid())
-  eventType  String   // "transfer", "access", "status_change"
+  eventType  String
   reason     String
-  status     String   // "pending", "approved", "rejected"
-  signature  String?  // mandatory on approval — digital signature / state hash
+  status     String
+  signature  String?
   timestamp  DateTime @default(now())
-
-  // Relations
   evidenceId String
-  evidence   Evidence @relation(fields: [evidenceId], references: [id])
   fromUserId String
-  fromUser   User     @relation("FromUser", fields: [fromUserId], references: [id])
   toUserId   String
   toUser     User     @relation("ToUser", fields: [toUserId], references: [id])
+  fromUser   User     @relation("FromUser", fields: [fromUserId], references: [id])
+  evidence   Evidence @relation(fields: [evidenceId], references: [id])
 }
 
-// ---------------------------------------------------------------------------
-// AccessLog — audit trail for all evidence access
-// ---------------------------------------------------------------------------
 model AccessLog {
   id         String   @id @default(uuid())
-  action     String   // "view", "download", "modify", "transfer"
+  action     String
   ipAddress  String?
   userAgent  String?
-  result     String   // "success", "denied", "failed"
+  result     String
   timestamp  DateTime @default(now())
-
-  // Relations
   evidenceId String
-  evidence   Evidence @relation(fields: [evidenceId], references: [id])
   userId     String
   user       User     @relation(fields: [userId], references: [id])
+  evidence   Evidence @relation(fields: [evidenceId], references: [id])
 }
 
-// ---------------------------------------------------------------------------
-// EvidenceFile — files associated with evidence
-// ---------------------------------------------------------------------------
 model EvidenceFile {
   id         String   @id @default(uuid())
   fileName   String
@@ -112,8 +86,6 @@ model EvidenceFile {
   sha256Hash String
   ipfsCid    String?
   uploadedAt DateTime @default(now())
-
-  // Relations
   evidenceId String
   evidence   Evidence @relation(fields: [evidenceId], references: [id])
 }

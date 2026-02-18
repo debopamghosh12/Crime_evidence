@@ -48,7 +48,7 @@ export default function EvidenceDetailPage() {
         if (!targetUserId || !transferReason) return;
         setTransferLoading(true);
         try {
-            await axios.post(`/api/v1/evidence/${params.id}/transfer`, {
+            await axios.post(`/api/v1/custody/evidence/${params.id}/transfer`, {
                 toUserId: targetUserId,
                 reason: transferReason
             });
