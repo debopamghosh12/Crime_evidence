@@ -30,9 +30,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const router = useRouter();
 
     useEffect(() => {
-        // Check localStorage for existing session
-        const storedToken = localStorage.getItem("token");
-        const storedUser = localStorage.getItem("user");
+        // Check sessionStorage for existing session (Tab Specific)
+        const storedToken = sessionStorage.getItem("token");
+        const storedUser = sessionStorage.getItem("user");
 
         if (storedToken && storedUser) {
             // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -47,17 +47,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const login = (newToken: string, newUser: User) => {
         setToken(newToken);
         setUser(newUser);
-        localStorage.setItem("token", newToken);
-        localStorage.setItem("user", JSON.stringify(newUser));
+        sessionStorage.setItem("token", newToken);
+        sessionStorage.setItem("user", JSON.stringify(newUser));
         axios.defaults.headers.common["Authorization"] = `Bearer ${newToken}`;
-        router.push("/dashboard");
+        // Redirect to dynamic user dashboard
+        router.push(`/dashboard/${newUser.id}`);
     };
 
     const logout = () => {
         setToken(null);
         setUser(null);
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("user");
         delete axios.defaults.headers.common["Authorization"];
         router.push("/login");
     };
