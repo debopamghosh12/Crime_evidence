@@ -31,10 +31,10 @@ export function CrimeBoxProvider({ children }: { children: React.ReactNode }) {
   const [activeBox, setActiveBox] = useState<CrimeBox | null>(null);
   const [permission, setPermission] = useState<Permission>(null);
 
-  // Restore session from localStorage if available (optional enhancement)
+  // Restore session from sessionStorage if available (Session Isolation)
   useEffect(() => {
-    const storedBox = localStorage.getItem("active_crime_box");
-    const storedPerm = localStorage.getItem("active_crime_box_perm");
+    const storedBox = sessionStorage.getItem("active_crime_box");
+    const storedPerm = sessionStorage.getItem("active_crime_box_perm");
     if (storedBox && storedPerm) {
       setActiveBox(JSON.parse(storedBox));
       setPermission(storedPerm as Permission);
@@ -68,8 +68,8 @@ export function CrimeBoxProvider({ children }: { children: React.ReactNode }) {
         setPermission(perm);
 
         // Persist session
-        localStorage.setItem("active_crime_box", JSON.stringify(box));
-        localStorage.setItem("active_crime_box_perm", perm);
+        sessionStorage.setItem("active_crime_box", JSON.stringify(box));
+        sessionStorage.setItem("active_crime_box_perm", perm);
         return true;
       }
       return false;
@@ -83,8 +83,8 @@ export function CrimeBoxProvider({ children }: { children: React.ReactNode }) {
   const leaveBox = () => {
     setActiveBox(null);
     setPermission(null);
-    localStorage.removeItem("active_crime_box");
-    localStorage.removeItem("active_crime_box_perm");
+    sessionStorage.removeItem("active_crime_box");
+    sessionStorage.removeItem("active_crime_box_perm");
   };
 
   return (

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import axios from "axios";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { ArrowLeft, Save, Loader2, UploadCloud } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -10,9 +10,11 @@ import { useCrimeBox } from "@/context/CrimeBoxContext";
 
 export default function NewEvidencePage() {
     const router = useRouter();
+    const params = useParams();
     const { permission, activeBox } = useCrimeBox();
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState("");
+    const userId = params.userId as string;
 
     // ... permission check ...
 
@@ -62,7 +64,7 @@ export default function NewEvidencePage() {
             });
 
             if (response.data.success) {
-                router.push("/dashboard/evidence");
+                router.push(`/dashboard/${userId}/evidence`);
             }
         } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
             setError(err.response?.data?.error || "Failed to register evidence.");
@@ -75,7 +77,7 @@ export default function NewEvidencePage() {
         <div className="max-w-2xl mx-auto space-y-6">
             <div className="flex items-center gap-4">
                 <Link
-                    href="/dashboard/evidence"
+                    href={`/dashboard/${userId}/evidence`}
                     className="rounded-full p-2 hover:bg-muted text-muted-foreground transition-colors"
                 >
                     <ArrowLeft className="h-5 w-5" />

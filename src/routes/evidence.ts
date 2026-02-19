@@ -219,25 +219,33 @@ router.get("/", authenticate, async (req: Request, res: Response) => {
 
         if (!canViewAll) {
             // Users can only see evidence they collected OR currently hold
-            // We combine this with existing filters using AND logic if needed,
-            // but since 'where' is an object, we need to be careful not to overwrite OR from search.
+            // UNLESS they are querying a specific Crime Box (Case ID).
+            // Since membership is client-side key-based in this MVP, we trust knowledge of the caseId.
 
-            const accessFilter = {
-                OR: [
-                    { collectedById: user.id },
-                    { currentCustodianId: user.id }
-                ]
-            };
-
-            if (where.OR) {
-                // If we already have an OR for search, we need to wrap everything in an AND
-                where.AND = [
-                    accessFilter,
-                    { OR: where.OR }
-                ];
-                delete where.OR; // Move search OR inside AND
+            if (caseId) {
+                // User is querying a specific box. Allow it if they know the ID.
+                // We strictly filter by this caseId.
+                where.caseId = caseId as string;
             } else {
-                where.OR = accessFilter.OR;
+                // User is viewing their personal evidence log (no box context).
+                // Restrict to what they collected or hold.
+                const accessFilter = {
+                    OR: [
+                        { collectedById: user.id },
+                        { currentCustodianId: user.id }
+                    ]
+                };
+
+                if (where.OR) {
+                    // If we already have an OR for search, we need to wrap everything in an AND
+                    where.AND = [
+                        accessFilter,
+                        { OR: where.OR }
+                    ];
+                    delete where.OR; // Move search OR inside AND
+                } else {
+                    where.OR = accessFilter.OR;
+                }
             }
         }
 

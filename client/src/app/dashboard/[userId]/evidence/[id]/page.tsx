@@ -34,6 +34,8 @@ interface EvidenceDetail {
 
 export default function EvidenceDetailPage() {
     const params = useParams();
+    const id = params.id as string;
+    const userId = params.userId as string;
     const [evidence, setEvidence] = useState<EvidenceDetail | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
@@ -48,13 +50,13 @@ export default function EvidenceDetailPage() {
         if (!targetUserId || !transferReason) return;
         setTransferLoading(true);
         try {
-            await axios.post(`/api/v1/custody/evidence/${params.id}/transfer`, {
+            await axios.post(`/api/v1/custody/evidence/${id}/transfer`, {
                 toUserId: targetUserId,
                 reason: transferReason
             });
             setTransferModalOpen(false);
             // Refresh evidence
-            const response = await axios.get(`/api/v1/evidence/${params.id}`);
+            const response = await axios.get(`/api/v1/evidence/${id}`);
             setEvidence(response.data.evidence);
             alert("Transfer initiated successfully!");
         } catch (error: unknown) {
@@ -68,7 +70,7 @@ export default function EvidenceDetailPage() {
     useEffect(() => {
         const fetchEvidence = async () => {
             try {
-                const response = await axios.get(`/api/v1/evidence/${params.id}`);
+                const response = await axios.get(`/api/v1/evidence/${id}`);
                 setEvidence(response.data.evidence);
             } catch {
                 setError("Failed to load evidence details.");
@@ -77,10 +79,10 @@ export default function EvidenceDetailPage() {
             }
         };
 
-        if (params.id) {
+        if (id) {
             fetchEvidence();
         }
-    }, [params.id]);
+    }, [id]);
 
     if (loading) {
         return (
@@ -94,7 +96,7 @@ export default function EvidenceDetailPage() {
         return (
             <div className="space-y-4 text-center">
                 <p className="text-destructive">{error || "Evidence not found."}</p>
-                <Link href="/dashboard/evidence" className="text-primary hover:underline">
+                <Link href={`/dashboard/${userId}/evidence`} className="text-primary hover:underline">
                     Return to Evidence Log
                 </Link>
             </div>
@@ -156,7 +158,7 @@ export default function EvidenceDetailPage() {
             <div className="flex flex-col gap-4 border-b border-border pb-6 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-4">
                     <Link
-                        href="/dashboard/evidence"
+                        href={`/dashboard/${userId}/evidence`}
                         className="rounded-full p-2 text-muted-foreground hover:bg-muted transition-colors"
                     >
                         <ArrowLeft className="h-5 w-5" />

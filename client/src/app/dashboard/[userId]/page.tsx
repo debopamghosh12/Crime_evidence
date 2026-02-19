@@ -7,6 +7,7 @@ import { useCrimeBox } from "@/context/CrimeBoxContext";
 import CreateCrimeBox from "@/components/crime-box/CreateCrimeBox";
 import JoinCrimeBox from "@/components/crime-box/JoinCrimeBox";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 
 export default function DashboardPage() {
     const { user } = useAuth();
@@ -16,6 +17,8 @@ export default function DashboardPage() {
         pendingTransfers: 0,
     });
     const [loading, setLoading] = useState(true);
+    const params = useParams();
+    const userId = params.userId as string;
 
     useEffect(() => {
         const fetchStats = async () => {
@@ -69,7 +72,7 @@ export default function DashboardPage() {
                                 </p>
                             </div>
                             <Link
-                                href="/dashboard/evidence/new"
+                                href={`/dashboard/${userId}/evidence/new`}
                                 className="mt-4 block w-full text-center rounded-md bg-primary py-2 text-sm font-semibold text-primary-foreground hover:bg-primary/90"
                             >
                                 Register Evidence
@@ -85,7 +88,7 @@ export default function DashboardPage() {
                             </p>
                         </div>
                         <Link
-                            href="/dashboard/evidence"
+                            href={`/dashboard/${userId}/evidence`}
                             className="mt-4 block w-full text-center rounded-md border border-input bg-background py-2 text-sm font-medium hover:bg-muted"
                         >
                             View All Evidence

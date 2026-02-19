@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useRouter, usePathname, useParams } from "next/navigation";
 import Link from "next/link";
 import { useAuth } from "@/context/AuthContext";
 import {
@@ -13,7 +13,6 @@ import {
     Menu,
     X,
 } from "lucide-react";
-import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 export default function DashboardLayout({
@@ -24,7 +23,9 @@ export default function DashboardLayout({
     const { user, isAuthenticated, isLoading, logout } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
+    const params = useParams();
     const [sidebarOpen, setSidebarOpen] = useState(false);
+    const userId = params.userId as string;
 
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
@@ -43,9 +44,9 @@ export default function DashboardLayout({
     if (!isAuthenticated) return null;
 
     const navigation = [
-        { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-        { name: "Evidence", href: "/dashboard/evidence", icon: FileText },
-        { name: "Chain of Custody", href: "/dashboard/custody", icon: Activity },
+        { name: "Dashboard", href: `/dashboard/${userId}`, icon: LayoutDashboard },
+        { name: "Evidence", href: `/dashboard/${userId}/evidence`, icon: FileText },
+        { name: "Chain of Custody", href: `/dashboard/${userId}/custody`, icon: Activity },
     ];
 
     return (
@@ -66,7 +67,7 @@ export default function DashboardLayout({
                 )}
             >
                 <div className="flex h-16 items-center justify-between px-6 border-b border-white/10">
-                    <Link href="/dashboard" className="flex items-center gap-2">
+                    <Link href={`/dashboard/${userId}`} className="flex items-center gap-2">
                         <span className="text-xl font-bold tracking-widest text-primary">DFX</span>
                         <span className="text-xs text-muted-foreground uppercase tracking-wider">Secure</span>
                     </Link>

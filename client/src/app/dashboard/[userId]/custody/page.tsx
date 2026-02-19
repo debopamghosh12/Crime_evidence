@@ -11,6 +11,7 @@ import {
     User,
     Loader2
 } from "lucide-react";
+import { useParams } from "next/navigation";
 
 export default function CustodyDashboardPage() {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -19,6 +20,8 @@ export default function CustodyDashboardPage() {
     const [outgoing, setOutgoing] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [actionLoading, setActionLoading] = useState<string | null>(null);
+    const params = useParams();
+    const userId = params.userId as string;
 
     const fetchTransfers = async () => {
         try {
@@ -108,7 +111,7 @@ export default function CustodyDashboardPage() {
                                 <div key={transfer.id} className="rounded-xl border border-border bg-card p-4 shadow-sm transition-all hover:shadow-md">
                                     <div className="flex items-start justify-between mb-3">
                                         <div className="space-y-1">
-                                            <Link href={`/dashboard/evidence/${transfer.evidence.id}`} className="font-semibold hover:underline flex items-center gap-2">
+                                            <Link href={`/dashboard/${userId}/evidence/${transfer.evidence.id}`} className="font-semibold hover:underline flex items-center gap-2">
                                                 {transfer.evidence.caseId}
                                                 <span className="text-xs font-normal text-muted-foreground border border-border px-1.5 py-0.5 rounded">
                                                     {transfer.evidence.type}
@@ -172,7 +175,7 @@ export default function CustodyDashboardPage() {
                                 <div key={transfer.id} className="rounded-xl border border-border bg-card p-4 shadow-sm opacity-75 hover:opacity-100 transition-opacity">
                                     <div className="flex items-start justify-between mb-3">
                                         <div className="space-y-1">
-                                            <Link href={`/dashboard/evidence/${transfer.evidence.id}`} className="font-semibold hover:underline">
+                                            <Link href={`/dashboard/${userId}/evidence/${transfer.evidence.id}`} className="font-semibold hover:underline">
                                                 {transfer.evidence.caseId}
                                             </Link>
                                             <p className="text-sm text-muted-foreground line-clamp-1">{transfer.evidence.description}</p>

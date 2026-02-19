@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Plus, Search, FileText, Loader2, ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCrimeBox } from "@/context/CrimeBoxContext";
+import { useParams } from "next/navigation";
 
 interface Evidence {
     id: string;
@@ -24,6 +25,8 @@ export default function EvidenceListPage() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState("");
     const [pagination, setPagination] = useState({ page: 1, totalPages: 1 });
+    const params = useParams();
+    const userId = params.userId as string;
 
     useEffect(() => {
         const fetchEvidence = async () => {
@@ -50,7 +53,7 @@ export default function EvidenceListPage() {
             fetchEvidence();
         }, 500); // Debounce search
         return () => clearTimeout(timer);
-    }, [searchTerm, pagination.page]);
+    }, [searchTerm, pagination.page, activeBox?.caseId]);
 
     return (
         <div className="space-y-8">
@@ -63,7 +66,7 @@ export default function EvidenceListPage() {
                 </div>
                 {permission === 'read-write' && (
                     <Link
-                        href="/dashboard/evidence/new"
+                        href={`/dashboard/${userId}/evidence/new`}
                         className="flex items-center justify-center bg-primary text-black px-6 py-2 text-sm font-bold uppercase tracking-wide hover:bg-primary/90 transition-all"
                     >
                         <Plus className="mr-2 h-4 w-4" />
@@ -134,7 +137,7 @@ export default function EvidenceListPage() {
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <Link
-                                                href={`/dashboard/evidence/${item.id}`}
+                                                href={`/dashboard/${userId}/evidence/${item.id}`}
                                                 className="inline-flex items-center justify-center p-2 text-primary hover:bg-primary hover:text-black transition-colors"
                                             >
                                                 <ArrowRight className="h-4 w-4" />
