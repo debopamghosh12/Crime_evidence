@@ -1,14 +1,12 @@
 import { Router, Request, Response } from "express";
 import { authenticate, requirePermission, prisma } from "../middleware/auth.js";
-import crypto from "crypto";
+import { generateRSAKeyPair } from "../utils/rsa.js";
 
 const router = Router();
 
 // Helper to generate keys
 const generateKeys = () => {
-  const privateKey = `PRI-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
-  const publicKey = `PUB-${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
-  return { privateKey, publicKey };
+  return generateRSAKeyPair();
 };
 
 // ---------------------------------------------------------------------------
