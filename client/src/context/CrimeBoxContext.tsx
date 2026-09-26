@@ -2,7 +2,8 @@
 
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { useAuth } from "./AuthContext";
-import axios from "axios";
+import { api, apiError } from "@/lib/api";
+import { useToast } from "@/components/ui/Toast";
 
 export type Permission = "read-write" | "read-only" | null;
 
@@ -28,6 +29,7 @@ const CrimeBoxContext = createContext<CrimeBoxContextType | undefined>(undefined
 
 export function CrimeBoxProvider({ children }: { children: React.ReactNode }) {
   const { user } = useAuth();
+  const toast = useToast();
   const [activeBox, setActiveBox] = useState<CrimeBox | null>(null);
   const [permission, setPermission] = useState<Permission>(null);
 
@@ -43,7 +45,7 @@ export function CrimeBoxProvider({ children }: { children: React.ReactNode }) {
 
   const createBox = async (name: string, caseId: string) => {
     try {
-      const response = await axios.post("/api/v1/boxes", { name, caseId });
+      const response = await api.post("/api/v1/boxes", { name, caseId });
       if (response.data.success) {
         const { box } = response.data;
 
@@ -53,6 +55,8 @@ export function CrimeBoxProvider({ children }: { children: React.ReactNode }) {
 
         sessionStorage.setItem("active_crime_box", JSON.stringify(box));
         sessionStorage.setItem("active_crime_box_perm", "read-write");
+
+        toast.success(`Crime Box "${box.name}" created. Share the keys with your team.`);
 
         // Persist keys separately so Head Officer can view them after joining
         sessionStorage.setItem("active_crime_box_keys", JSON.stringify({
@@ -67,15 +71,14 @@ export function CrimeBoxProvider({ children }: { children: React.ReactNode }) {
       }
       return null;
     } catch (error) {
-      console.error("Failed to create box:", error);
-      alert("Failed to create Crime Box. Case ID might already exist.");
+      toast.error(apiError(error, "Failed to create Crime Box. Case ID might already exist."));
       return null;
     }
   };
 
   const joinBox = async (key: string): Promise<boolean> => {
     try {
-      const response = await axios.post("/api/v1/boxes/join", { key });
+      const response = await api.post("/api/v1/boxes/join", { key });
 
       if (response.data.success) {
         const { box, permission: perm } = response.data;
@@ -85,17 +88,18 @@ export function CrimeBoxProvider({ children }: { children: React.ReactNode }) {
         // Persist session
         sessionStorage.setItem("active_crime_box", JSON.stringify(box));
         sessionStorage.setItem("active_crime_box_perm", perm);
+        toast.success(`Joined "${box.name}" with ${perm} access.`);
         return true;
       }
       return false;
-    } catch (error: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
-      console.error("Failed to join box:", error);
-      alert(error.response?.data?.error || "Failed to join Crime Box.");
+    } catch (error) {
+      toast.error(apiError(error, "Failed to join Crime Box."));
       return false;
     }
   };
 
   const leaveBox = () => {
+    if (activeBox) toast.info(`You left "${activeBox.name}".`);
     setActiveBox(null);
     setPermission(null);
     sessionStorage.removeItem("active_crime_box");

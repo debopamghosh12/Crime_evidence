@@ -1,9 +1,10 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import axios from "axios";
+import { api, apiError } from "@/lib/api";
+import { useToast } from "@/components/ui/Toast";
 import { useAuth } from "@/context/AuthContext";
-import { Bell, Check, CheckCheck, Loader2, Info, AlertTriangle, ShieldCheck } from "lucide-react";
+import { Bell, CheckCheck, Loader2, Info, AlertTriangle, ShieldCheck, ArrowRightLeft, XCircle, Trash2, Users } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import LottieLoader from "@/components/ui/LottieLoader";
@@ -21,6 +22,13 @@ interface Notification {
 const TYPE_ICON: Record<string, React.ReactNode> = {
   access_request: <AlertTriangle className="h-4 w-4 text-amber-400" />,
   access_request_reviewed: <ShieldCheck className="h-4 w-4 text-green-400" />,
+  transfer_request: <ArrowRightLeft className="h-4 w-4 text-amber-400" />,
+  transfer_accepted: <ShieldCheck className="h-4 w-4 text-green-400" />,
+  transfer_rejected: <XCircle className="h-4 w-4 text-red-400" />,
+  disposal_request: <Trash2 className="h-4 w-4 text-amber-400" />,
+  disposal_decision: <Trash2 className="h-4 w-4 text-red-400" />,
+  case_assignment: <Users className="h-4 w-4 text-blue-400" />,
+  case_unassignment: <Users className="h-4 w-4 text-slate-400" />,
   default: <Info className="h-4 w-4 text-blue-400" />,
 };
 
@@ -34,9 +42,9 @@ function timeAgo(date: string) {
 
 export default function NotificationsPage() {
   const { token } = useAuth();
+  const toast = useToast();
   const params = useParams();
   const userId = params.userId as string;
-  const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000";
 
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,11 +54,9 @@ export default function NotificationsPage() {
     if (!token) return;
     setLoading(true);
     try {
-      const r = await axios.get(`${API}/api/v1/notifications`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const r = await api.get("/api/v1/notifications");
       setNotifications(r.data.notifications || []);
-    } catch (e) { console.error(e); }
+    } catch (e) { console.warn(e); }
     finally { setLoading(false); }
   }, [token]);
 
@@ -59,21 +65,18 @@ export default function NotificationsPage() {
   const markAllRead = async () => {
     setMarking(true);
     try {
-      await axios.put(`${API}/api/v1/notifications/read-all`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.put("/api/v1/notifications/read-all");
       setNotifications(prev => prev.map(n => ({ ...n, read: true })));
-    } catch (e) { console.error(e); }
+      toast.success("All notifications marked as read.");
+    } catch (e) { toast.error(apiError(e, "Failed to mark notifications as read")); }
     finally { setMarking(false); }
   };
 
   const markRead = async (id: string) => {
     try {
-      await axios.put(`${API}/api/v1/notifications/${id}/read`, {}, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      await api.put(`/api/v1/notifications/${id}/read`);
       setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
-    } catch (e) { console.error(e); }
+    } catch (e) { console.warn(e); }
   };
 
   const unread = notifications.filter(n => !n.read).length;
